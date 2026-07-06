@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 app = FastAPI(
-    title="Radar de Sanções — API",
+    title="Sonar Público — API",
     description=(
         "API pública que cruza sanções (CEIS/CNEP/CEPIM/Leniência), contratos "
         "federais e quadro societário. Dados: Portal da Transparência e Receita "

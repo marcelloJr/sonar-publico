@@ -1,6 +1,6 @@
 # web
 
-Frontend do Radar de Sanções (Fase 3 — a partir de 27/07).
+Frontend do Sonar Público (Fase 3 — a partir de 27/07).
 
 Scaffold planejado (SPEC §P3.1):
 

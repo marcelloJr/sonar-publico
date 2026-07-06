@@ -1,7 +1,7 @@
 [project]
 name = "radar-api"
 version = "0.1.0"
-description = "API pública do Radar de Sanções (FastAPI)"
+description = "API pública do Sonar Público (FastAPI)"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",

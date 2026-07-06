@@ -1,4 +1,6 @@
-# Radar de Sanções — Especificação do Projeto
+# Sonar Público — Especificação do Projeto
+
+> Nome anterior: "Radar de Sanções" (renomeado em 06/07/2026; domínio: sonarpublico.com.br)
 
 > Projeto para o 2º Concurso de Reúso de Dados Abertos da CGU (2026)
 > Equipe: 3 desenvolvedores | Prazo de inscrição: 11/09/2026

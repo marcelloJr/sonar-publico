@@ -1,4 +1,4 @@
-# Radar de Sanções
+# Sonar Público
 
 Plataforma pública que cruza **sanções** (CEIS, CNEP, CEPIM, Acordos de Leniência), **contratos do governo federal** e **quadro societário** (CNPJ/QSA da Receita Federal) para expor empresas sancionadas que seguem contratando com o poder público — e possíveis "empresas sucessoras" via sócios em comum.
 

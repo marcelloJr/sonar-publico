@@ -1,7 +1,7 @@
 [project]
 name = "radar-pipeline"
 version = "0.1.0"
-description = "Pipeline de dados do Radar de Sanções: download, normalização e cruzamento das bases públicas"
+description = "Pipeline de dados do Sonar Público: download, normalização e cruzamento das bases públicas"
 requires-python = ">=3.12"
 dependencies = [
     "duckdb>=1.3",
