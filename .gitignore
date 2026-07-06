@@ -1,0 +1,32 @@
+# Dados brutos e processados — NUNCA versionar (dump do CNPJ ~85 GB)
+data/
+*.zip
+*.csv
+*.parquet
+*.duckdb
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+
+# Ambiente e segredos (token da API do Portal da Transparência etc.)
+.env
+.env.*
+!.env.example
+
+# SO / editor
+.DS_Store
+.idea/
+.vscode/
