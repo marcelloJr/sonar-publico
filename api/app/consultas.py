@@ -99,7 +99,8 @@ def ficha(con: duckdb.DuckDBPyConnection, cnpj: str) -> dict | None:
         """, [raiz]),
         "contratos": linhas_como_dicts(con, """
             SELECT origem, esfera, numero_contrato, orgao, objeto, situacao,
-                   valor_final, data_inicio_vigencia, data_fim_vigencia, cnpj_contratado
+                   modalidade, valor_final, data_inicio_vigencia,
+                   data_fim_vigencia, cnpj_contratado
             FROM contratos WHERE cnpj_contratado[:8] = ?
             ORDER BY valor_final DESC NULLS LAST
             LIMIT 100
