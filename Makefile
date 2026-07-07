@@ -1,4 +1,4 @@
-.PHONY: setup lint format test api pipeline
+.PHONY: setup lint format test api pipeline pipeline-amostra
 
 setup:            ## Instala todas as dependências (uv workspace)
 	uv sync --all-packages
@@ -15,6 +15,8 @@ test:             ## Roda todos os testes
 api:              ## Sobe a API local em http://localhost:8000
 	uv run uvicorn app.main:app --reload --app-dir api
 
-pipeline:         ## Pipeline completo de dados (P1.9 — ainda não implementado)
-	@echo "TODO(P1.9): download -> normalização -> cruzamento -> carga"
-	@exit 1
+pipeline:         ## Pipeline completo: download -> normalização -> cruzamento
+	uv run python -m radar_pipeline.pipeline
+
+pipeline-amostra: ## Pipeline em modo amostra (1/10 do CNPJ — cabe em laptop)
+	uv run python -m radar_pipeline.pipeline --amostra

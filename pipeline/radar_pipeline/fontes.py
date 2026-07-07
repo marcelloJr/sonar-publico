@@ -179,19 +179,43 @@ def contratacoes_pncp(inicio: date, fim: date, modalidade: int) -> Iterator[dict
     )
 
 
-def baixar(url: str, destino: Path, *, auth: tuple[str, str] | None = None) -> Path:
-    """Baixa `url` para `destino` em streaming; retorna o caminho gravado.
+def baixar(
+    url: str, destino: Path, *, auth: tuple[str, str] | None = None, tentativas: int = 12
+) -> Path:
+    """Baixa `url` para `destino` em streaming, com retry e resume (Range).
 
+    O servidor da Receita derruba conexões longas no meio (~1 GB); em caso de
+    timeout/queda, retomamos do byte onde o ``.part`` parou. Se o servidor não
+    suportar Range (responde 200 em vez de 206), recomeça do zero.
     Para URLs do WebDAV da Receita, use ``auth=(RECEITA_SHARE_ID, "")``.
     """
     destino.parent.mkdir(parents=True, exist_ok=True)
     tmp = destino.with_suffix(destino.suffix + ".part")
-    with httpx.stream(
-        "GET", url, follow_redirects=True, timeout=300, headers=_HEADERS, auth=auth
-    ) as resposta:
-        resposta.raise_for_status()
-        with tmp.open("wb") as arquivo:
-            for pedaco in resposta.iter_bytes():
-                arquivo.write(pedaco)
+    for tentativa in range(tentativas):
+        headers = dict(_HEADERS)
+        ja_baixado = tmp.stat().st_size if tmp.exists() else 0
+        if ja_baixado:
+            headers["Range"] = f"bytes={ja_baixado}-"
+        try:
+            with httpx.stream(
+                "GET",
+                url,
+                follow_redirects=True,
+                timeout=httpx.Timeout(300, connect=60),
+                headers=headers,
+                auth=auth,
+            ) as resposta:
+                if resposta.status_code == 416 and ja_baixado:
+                    break  # Range além do fim: arquivo já está completo
+                resposta.raise_for_status()
+                modo = "ab" if resposta.status_code == 206 else "wb"
+                with tmp.open(modo) as arquivo:
+                    for pedaco in resposta.iter_bytes():
+                        arquivo.write(pedaco)
+            break
+        except (httpx.TimeoutException, httpx.TransportError):
+            if tentativa == tentativas - 1:
+                raise
+            time.sleep(5 * (tentativa + 1))
     tmp.rename(destino)
     return destino
