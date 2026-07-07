@@ -20,15 +20,18 @@ Plataforma web pública onde qualquer cidadão, jornalista ou gestor pode:
 4. Entender tudo em **linguagem simples**: cada sanção acompanha explicação acessível do que significa.
 
 ### 1.3 Alinhamento com os critérios de julgamento do concurso
+
+Critérios oficiais do **Edital CGU nº 46/2026, item 8.2** (DOU 23/06/2026 — ver `docs/regulamento.md`). Nota: a página da CGU ainda exibe uma tabela de 7 critérios herdada da 1ª edição; a fonte normativa é o edital.
+
 | Critério | Peso | Como atendemos |
 |---|---|---|
-| Apresentação | 2 | Vídeo demo, interface limpa, storytelling do problema |
-| Inovação | 2 | Grafo de vínculos societários para detecção de risco (inédito em ferramenta pública gratuita) |
-| Transparência e controle social | 2 | Fiscalização direta de contratações públicas pelo cidadão |
-| Foco em pessoas / impacto | 2 | Ferramenta usável por não-especialistas; protege dinheiro público |
-| Duas ou mais fontes de dados | 1 | 5 fontes cruzadas (ver §2) |
-| Uso de ferramentas tecnológicas | 1 | Pipeline de dados, API, grafo, web app |
-| Inclusividade | 1 | Linguagem simples, acessibilidade WCAG 2.1 AA, mobile-first |
+| Apresentação e usabilidade | 1 | Vídeo demo com storytelling, interface limpa mobile-first, linguagem simples, WCAG 2.1 AA |
+| Inovação e originalidade | 1 | Grafo de vínculos societários para detecção de sucessoras (inédito em ferramenta pública gratuita) |
+| **Relevância e impacto** | **2** | Fiscalização direta de contratações públicas; casos reais de vínculo revelados pela ferramenta (P4.3) |
+| **Benefício para a sociedade ou economia** | **2** | Gratuito para cidadãos, jornalistas e gestores; protege dinheiro público ao expor fornecedores de risco |
+| Replicabilidade e escalabilidade | 1 | Código aberto + API pública documentada + pipeline reproduzível; arquitetura replicável para estados/municípios (roadmap §8) |
+
+Os dois critérios de peso 2 concentram metade da nota: a apresentação e os textos devem ser construídos em torno de **impacto e benefício concreto** (casos reais, valor contratado sob alerta), não das features técnicas.
 
 ### 1.4 Posicionamento e cuidado jurídico
 A plataforma **aponta vínculos, não acusa**. Todos os textos devem deixar claro que: (a) os dados vêm de fontes oficiais públicas; (b) vínculo societário com empresa sancionada não é prova de irregularidade; (c) a metodologia de matching tem limitações documentadas (ver §4.4).
@@ -39,14 +42,17 @@ A plataforma **aponta vínculos, não acusa**. Todos os textos devem deixar clar
 
 | # | Base | Origem | Formato | Tamanho aprox. | Atualização |
 |---|---|---|---|---|---|
-| 1 | CEIS — Empresas Inidôneas e Suspensas | Portal da Transparência / CGU | CSV | pequeno (dezenas de milhares de linhas) | mensal |
-| 2 | CNEP — Empresas Punidas (Lei Anticorrupção) | Portal da Transparência / CGU | CSV | pequeno | mensal |
-| 3 | CEPIM — Entidades sem fins lucrativos impedidas | Portal da Transparência / CGU | CSV | pequeno | mensal |
-| 4 | Acordos de Leniência | Portal da Transparência / CGU | CSV | pequeno | mensal |
-| 5 | Contratos e Licitações do Poder Executivo Federal | Portal da Transparência | CSV (planilhas mensais) + API | médio-grande | mensal |
-| 6 | Cadastro Nacional da Pessoa Jurídica (CNPJ) + QSA | Receita Federal | CSVs em ZIPs (~5 GB compactado) | muito grande (~60M empresas) | mensal |
+| 1 | CEIS — Empresas Inidôneas e Suspensas | Portal da Transparência / CGU | CSV | pequeno (~23 mil linhas) | diária (snapshot único) |
+| 2 | CNEP — Empresas Punidas (Lei Anticorrupção) | Portal da Transparência / CGU | CSV | pequeno | diária (snapshot único) |
+| 3 | CEPIM — Entidades sem fins lucrativos impedidas | Portal da Transparência / CGU | CSV | pequeno | diária/irregular (snapshot único) |
+| 4 | Acordos de Leniência | Portal da Transparência / CGU | CSV (2 arquivos: Acordos + Efeitos) | pequeno | diária (snapshot único) |
+| 5 | Contratos (Compras) do Poder Executivo Federal | Portal da Transparência | CSV (planilhas mensais; mês corrente sai defasado) | médio (~2,5 mil contratos/mês) | mensal |
+| 6 | Licitações/contratações públicas | **PNCP** (novas, pós-Lei 14.133) + Portal da Transparência (histórico 2013–04/2024) | API JSON paginada (PNCP) + CSV | médio | contínua (PNCP) |
+| 7 | Cadastro Nacional da Pessoa Jurídica (CNPJ) + QSA | Receita Federal | CSVs sem cabeçalho em ZIPs (~85 GB descompactado) | muito grande (~60M empresas; QSA ≈ 25M+ linhas) | mensal |
 
-**Ação obrigatória na semana 1:** localizar e registrar as URLs exatas de cada conjunto no dados.gov.br (o concurso exige citar os conjuntos catalogados lá) e baixar os dicionários de dados de cada base.
+> A base de licitações do Portal da Transparência foi **descontinuada em 04/2024** (migração ao PNCP). O PNCP cobre todas as esferas — filtramos federal (`esferaId == "F"`) na v1. URLs verificadas, formatos e gotchas: `docs/fontes.md` e `docs/layouts.md`.
+
+**Ação obrigatória na semana 1:** ✅ feita — URLs registradas em `docs/fontes.md`, layouts validados com amostras reais em `docs/layouts.md`.
 
 ---
 
@@ -155,7 +161,7 @@ O QSA público da Receita **mascara o CPF** (ex.: `***123456**`). Estratégia:
 - [ ] **P3.4** Visualização do grafo de vínculos (vis.js ou d3-force): empresa central, sócios, empresas relacionadas coloridas por grau.
 - [ ] **P3.5** Página de órgão: lista de fornecedores ordenável por grau de risco e valor.
 - [ ] **P3.6** Páginas institucionais: Metodologia (com limitações — §4.4), Fontes de Dados (com links para dados.gov.br), Glossário em linguagem simples.
-- [ ] **P3.7** Acessibilidade WCAG 2.1 AA: contraste, navegação por teclado, aria-labels, textos alternativos; rodar Lighthouse/axe e corrigir. **Documentar isso — é critério de inclusividade.**
+- [ ] **P3.7** Acessibilidade WCAG 2.1 AA: contraste, navegação por teclado, aria-labels, textos alternativos; rodar Lighthouse/axe e corrigir. **Documentar isso — conta em "apresentação e usabilidade" e em "benefício para a sociedade" (edital 2026 não tem mais critério de inclusividade próprio).**
 - [ ] **P3.8** Deploy na Vercel com domínio final.
 
 ### FASE 4 — Polimento e conteúdo (Semana 8: 24/08 → 31/08) — todos
@@ -180,7 +186,7 @@ O QSA público da Receita **mascara o CPF** (ex.: `***123456**`). Estratégia:
 | Backend & Infra | Dev 2 | Fase 2; deploy geral; apoio no pipeline e no grafo do front |
 | Frontend & Apresentação | Dev 3 | Fases 3 e 5; acessibilidade; vídeo e materiais de inscrição |
 
-> Apresentação tem peso 2 no julgamento — o papel do Dev 3 não é secundário. Reservar tempo real para o vídeo e os textos.
+> Os critérios de maior peso (relevância/impacto e benefício à sociedade, peso 2 cada) são comunicados pelo vídeo e pelos textos — o papel do Dev 3 não é secundário. Reservar tempo real para a apresentação.
 
 ## 7. Riscos e Mitigações
 

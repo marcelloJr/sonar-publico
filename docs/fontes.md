@@ -24,9 +24,19 @@
 
 ## 5. Compras/Contratos e Licitações — Portal da Transparência
 
-- **Compras (mensal):** `.../download-de-dados/compras/AAAAMM` → `AAAAMM_Compras.zip` com 4 CSVs: `Compras`, `ItemCompra`, `TermoAditivo`, `Apostilamento`.
-- **Licitações (mensal):** `.../download-de-dados/licitacoes/AAAAMM` → `AAAAMM_Licitacoes.zip` com `Licitação`, `ItemLicitação`, `ParticipantesLicitação`, `EmpenhosRelacionados`.
-- **Formato (verificado em 202605_Compras.zip):** CSV `;`, aspas duplas, ISO-8859-1, CRLF, com cabeçalho.
+- **Compras (mensal, ativa):** `.../download-de-dados/compras/AAAAMM` → `AAAAMM_Compras.zip` com 4 CSVs: `Compras`, `ItemCompra`, `TermoAditivo`, `Apostilamento`.
+  - ⚠️ **Defasagem de publicação:** o mês mais recente sai quase vazio no início (06/2026 tinha 33 contratos em 06/07, vs 2.548 em 05/2026). Recarregar os últimos 2 meses a cada execução.
+- **Licitações — ⚠️ DESCONTINUADA em 04/2024** (migração ao PNCP, Lei 14.133). Arquivos disponíveis de 01/2013 a 04/2024 em `.../download-de-dados/licitacoes/AAAAMM`. Histórico complementar; dados novos vêm do PNCP (abaixo).
+
+### PNCP — Portal Nacional de Contratações Públicas (licitações/contratações pós-2024)
+
+- **API de consulta:** `https://pncp.gov.br/api/consulta/v1` — pública, **sem token**, JSON paginado. Cliente implementado em `radar_pipeline.fontes` (`contratos_pncp`, `contratacoes_pncp`).
+- Endpoints usados: `/contratos?dataInicial&dataFinal` (tamanhoPagina ≤ **500**) e `/contratacoes/publicacao?dataInicial&dataFinal&codigoModalidadeContratacao` (tamanhoPagina ≤ **50**; a modalidade é obrigatória — as 14 estão em `MODALIDADES_PNCP`, confirmadas na API em 06/07/2026).
+- ⚠️ **Rate limit agressivo (HTTP 429)** — o cliente faz backoff exponencial respeitando `Retry-After`. Não paralelizar requisições.
+- ⚠️ **Cobre todas as esferas** (federal/estadual/municipal): filtrar `orgaoEntidade.esferaId == "F"` no consumo (~3% dos registros na sondagem). Bônus: expansão para estados/municípios (roadmap §8 do SPEC) já teria fonte pronta.
+- Volume sondado: ~31 mil contratos/6 dias (todas as esferas); federais ≈ 1 mil/semana.
+- dados.gov.br: o PNCP é sítio oficial do governo federal (aceito pelo edital, item 6.3); para o cadastro do reúso, citar também o conjunto correspondente no dados.gov.br se disponível.
+- **Formato (verificado em 202605_Compras.zip):** CSV `;`, aspas duplas, ISO-8859-1, CRLF, com cabeçalho. Layouts completos: [layouts.md](layouts.md).
 - **Fonte alternativa:** [Compras.gov.br / MGI](https://dados.gov.br/dados/conjuntos-dados/compras-publicas-do-governo-federal).
 
 ### API de Dados do Portal da Transparência
@@ -48,6 +58,7 @@
 ## Pendências / verificação humana
 
 - [ ] Conferir no navegador o conteúdo dos dicionários do Portal da Transparência (páginas são JS-rendered).
-- [ ] Validar encoding dos arquivos `Socios*.zip` do CNPJ com amostra real (P0.4).
-- [ ] Decidir se vamos arquivar snapshots diários das bases de sanções (o bucket da CGU só serve o mais recente).
+- [x] ~~Validar encoding dos arquivos `Socios*.zip` do CNPJ com amostra real (P0.4).~~ Feito 06/07 — ver [layouts.md](layouts.md); ler tudo como ISO-8859-1.
+- [ ] Decidir se vamos arquivar snapshots diários das bases de sanções (o bucket da CGU só serve o mais recente e nem toda base publica todo dia — CEPIM estava em 03/07 no dia 06/07).
 - [ ] Criar token da API do Portal da Transparência (um por dev, para testes de sanidade).
+- [ ] Decidir se PNCP entra como fonte de licitações pós-04/2024 (roadmap; a base antiga foi descontinuada).
