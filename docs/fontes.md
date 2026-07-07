@@ -55,6 +55,17 @@
 - **URLs antigas mortas (não usar):** `dadosabertos.rfb.gov.br/CNPJ/` (timeout) e `arquivos.receitafederal.gov.br/cnpj/dados_abertos_cnpj/` (404).
 - ⚠️ O endereço da Receita já mudou 3+ vezes. **No pipeline, resolver a URL a partir da página do conjunto no dados.gov.br em cada execução**, com o share atual como fallback, e falhar com mensagem clara se ambos quebrarem.
 
+## Contratos estaduais e municipais (roadmap — mapeado em 06/07/2026)
+
+O SPEC §3 define o pipeline parametrizável por **escopo/período/modo**; quando a esfera estadual/municipal for ativada, estas são as fontes, em ordem de preferência:
+
+1. **PNCP (já integrado)** — a Lei 14.133 obriga União, estados e municípios a publicarem contratações e contratos; regime único desde 01/2024. Para ativar: não filtrar `esferaId == "F"` e usar os filtros server-side `uf` / `codigoMunicipioIbge` (testados: `uf=SC` e `codigoMunicipioIbge=4205407` retornam só o recorte). Volume nacional ~1,9M contratos/ano em todas as esferas. **Limitações:** sem histórico pré-2023/2024 (contratos da Lei 8.666 não migraram) e completude irregular em municípios pequenos nos primeiros anos — documentar na página de Metodologia.
+2. **Compras.gov.br dados abertos** (`dadosabertos.compras.gov.br`, API SIASG, no ar) — estados/municípios que usam voluntariamente o sistema federal. Complemento parcial, não cobertura.
+3. **TCEs (Tribunais de Contas estaduais)** — vários publicam dados abertos dos contratos municipais fiscalizados (TCE-SP/Audesp, TCE-RS, TCM-GO etc.), inclusive histórico pré-2024. Cada um com schema e qualidade próprios: integrar é um projeto por estado. Caminho para profundidade em um estado específico, não para cobertura nacional.
+4. **Querido Diário (OKBR)** — diários oficiais municipais raspados; texto não estruturado. Descartado para este projeto.
+
+Obs.: a página "dados abertos" do PNCP (`pncp.gov.br/app/dados-abertos`) é um app JavaScript — não foi possível confirmar por fetch se há download em massa além da API de consulta; conferir no navegador se a carga histórica via API se mostrar lenta demais.
+
 ## Pendências / verificação humana
 
 - [ ] Conferir no navegador o conteúdo dos dicionários do Portal da Transparência (páginas são JS-rendered).

@@ -1,0 +1,25 @@
+# Configuração do pipeline do Sonar Público (SPEC §3 — replicabilidade).
+# Qualquer pessoa pode clonar o repositório, ajustar este arquivo e rodar
+# o pipeline no próprio recorte (ex.: só o seu município).
+
+[escopo]
+# Esferas dos CONTRATOS a carregar: F = federal, E = estadual, M = municipal.
+# As bases de sanções são nacionais e sempre carregadas por inteiro.
+# Estadual/municipal vêm do PNCP (sem histórico pré-2024 — ver docs/fontes.md).
+esferas = ["F"]
+# Recorte geográfico opcional (aplicado nos contratos do PNCP):
+# uf = "SC"
+# codigo_municipio_ibge = "4205407"   # Florianópolis
+
+[periodo]
+# Carregar contratos a partir deste mês (AAAA-MM).
+contratos_desde = "2024-01"
+
+[modo]
+# true = modo amostra: processa só 1 das 10 partes do QSA do CNPJ.
+# Bom para testar o pipeline num laptop; NÃO usar para o site público.
+amostra = false
+
+[caminhos]
+# Onde ficam downloads, staging e o banco DuckDB (relativo à raiz do repo).
+dados = "data"

@@ -19,7 +19,10 @@ CEPIM: `CNPJ ENTIDADE`, `NOME ENTIDADE`, `NÚMERO CONVÊNIO`, `ÓRGÃO CONCEDENT
 ⚠️ Gotchas:
 - O snapshot **não é diário em todas as bases** (CEPIM mais recente era de 03/07 num dia 06/07). O pipeline recua dia a dia até achar (`baixar_sancao_mais_recente`).
 - Cabeçalhos têm typos oficiais (`ABRAGÊNCIA`, `LENIÊNICA`) — mapear pelos nomes exatos, não corrigir.
-- Sanções federais, estaduais e municipais misturadas — filtrar/deixar claro por `ESFERA ÓRGÃO SANCIONADOR`.
+- Sanções federais, estaduais e municipais misturadas — filtrar/deixar claro por `ESFERA ÓRGÃO SANCIONADOR`. Distribuição real no CEIS de 06/07/2026: 9.703 estaduais, 8.308 federais, 4.605 municipais.
+- **Encoding misto dentro do mesmo arquivo**: o `Acordos.csv` de 06/07/2026 tem cabeçalho em **Windows-1252** (com en dash `0x96` nos nomes `RAZÃO SOCIAL – CADASTRO RECEITA`) e linhas de dados em **UTF-8**. Nenhum encoding único lê o arquivo — o pipeline transcodifica linha a linha (UTF-8 → cp1252 → latin-1) e normaliza o cabeçalho (`sancoes._transcodifica_utf8`).
+- `Acordos.csv` tem ~150 linhas para ~55 acordos: um acordo cobre várias empresas (uma linha por CNPJ). O grão do modelo é (empresa, sanção).
+- CEPIM não tem datas → toda entrada é tratada como vigente enquanto listada.
 
 ## Compras/Contratos (Portal da Transparência) — mensal, com cabeçalho, CRLF
 

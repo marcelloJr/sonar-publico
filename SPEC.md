@@ -87,6 +87,7 @@ A plataforma **aponta vínculos, não acusa**. Todos os textos devem deixar clar
 - **PostgreSQL como banco final**: o resultado do cruzamento é enxuto (só empresas relevantes: sancionadas + contratadas + vizinhas de grafo). Alternativa aceitável: SQLite/DuckDB read-only se a hospedagem for estática.
 - **Grafo sem Neo4j**: tabela de arestas `vinculos(cnpj_a, cnpj_b, tipo, detalhe)` + consultas recursivas (CTE) resolve para 1–2 graus de separação. Não adicionar complexidade desnecessária.
 - **Infra gratuita/barata**: Vercel (front) + Railway/Fly.io/Render (API + banco). Atualização mensal via GitHub Actions rodando o pipeline.
+- **Pipeline parametrizável (replicabilidade — critério do edital, peso 1)**: qualquer pessoa deve conseguir clonar e rodar. Um config único (`config.toml` ou flags de CLI) com três eixos: **escopo** (esfera/UF/município — a API do PNCP aceita filtro server-side de `uf` e `codigoMunicipioIbge`, verificado em 06/07/2026), **período** (`desde = AAAA-MM` para compras/PNCP; sanções e CNPJ são snapshots) e **modo** (`completo` | `amostra` — amostra processa só 1 das 10 partes do QSA, viável em laptop). Fontes monolíticas (Portal da Transparência, Receita) baixam inteiras e filtram na transformação; onde a fonte filtra (PNCP), o filtro vai na requisição. Implementar como primeiro item da Fase 1 — define a interface do resto do pipeline.
 
 ---
 
@@ -199,7 +200,7 @@ O QSA público da Receita **mascara o CPF** (ex.: `***123456**`). Estratégia:
 | Layout dos CSVs do governo mudar | Pipeline quebra | Validar contra dicionário de dados; testes de schema no CI |
 
 ## 8. Fora de Escopo (v1) — citar como roadmap na inscrição
-- Contratos estaduais e municipais.
+- **Contratos estaduais e municipais** — mas com caminho pavimentado: o PNCP (fonte já integrada) cobre todas as esferas desde a Lei 14.133, e a arquitetura de config (§3) reduz a ativação a `esfera = "E"/"M"` + UF/município. Sem histórico pré-2024 e com adesão irregular em municípios pequenos; fontes complementares mapeadas em `docs/fontes.md` (Compras.gov.br, TCEs). Nota: as bases de sanções nacionais (CEIS etc.) já incluem sanções aplicadas por órgãos estaduais e municipais.
 - Cruzamento com emendas parlamentares e convênios.
 - Alertas por e-mail / monitoramento contínuo de um CNPJ.
 - Grau 2 de risco completo.
