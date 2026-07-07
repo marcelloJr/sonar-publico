@@ -82,7 +82,24 @@ def ficha(con: duckdb.DuckDBPyConnection, cnpj: str) -> dict | None:
             GROUP BY cnpj_basico
         """, [raiz])
         if not alternativo:
-            return None
+            # sem nome em lugar nenhum, mas pode estar no universo (aparece no
+            # grafo como nó): a ficha deve existir mesmo assim
+            no_universo = con.execute(
+                """
+                SELECT 1 FROM socios WHERE cnpj_basico = ?
+                UNION ALL
+                SELECT 1 FROM empresas_risco WHERE cnpj_basico = ?
+                LIMIT 1
+                """,
+                [raiz, raiz],
+            ).fetchone()
+            if not no_universo:
+                return None
+            alternativo = [{
+                "cnpj_basico": raiz,
+                "razao_social": None,
+                "cadastro_receita_disponivel": False,
+            }]
         cadastro = alternativo
     return {
         "cadastro": cadastro[0],
@@ -131,12 +148,16 @@ def grafo(con: duckdb.DuckDBPyConnection, cnpj: str, profundidade: int = 1) -> d
             """, [*vizinhos, *vizinhos])
     ids = {raiz} | {a["cnpj_a"] for a in arestas} | {a["cnpj_b"] for a in arestas}
     marcadores = ", ".join("?" * len(ids))
+    # nomes com fallback (Receita > sanções > contratos) para não deixar nó
+    # sem rótulo quando a empresa está fora do dump do CNPJ
     nos = linhas_como_dicts(con, f"""
-        SELECT e.cnpj_basico AS id, e.razao_social AS nome, min(r.grau) AS grau
-        FROM empresas e
-        LEFT JOIN empresas_risco r ON r.cnpj_basico = e.cnpj_basico
-        WHERE e.cnpj_basico IN ({marcadores})
-        GROUP BY ALL
+        WITH {_NOMES_SQL},
+        ids(id) AS (VALUES {", ".join(f"(?)" for _ in ids)})
+        SELECT i.id, arg_min(n.nome, n.prioridade) AS nome, min(r.grau) AS grau
+        FROM ids i
+        LEFT JOIN nomes n ON n.cnpj_basico = i.id AND n.nome IS NOT NULL
+        LEFT JOIN empresas_risco r ON r.cnpj_basico = i.id
+        GROUP BY i.id
     """, [*ids])
     # dedup de arestas (profundidade 2 pode repetir)
     unicas = {(a["cnpj_a"], a["cnpj_b"], a["socio_comum"]): a for a in arestas}

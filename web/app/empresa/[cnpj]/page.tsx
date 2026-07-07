@@ -10,7 +10,9 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BadgeGrau } from "@/components/badge-grau";
+import { BotaoCopiar } from "@/components/botao-copiar";
 import { BotaoVoltar } from "@/components/botao-voltar";
+import { GrafoVinculos } from "@/components/grafo-vinculos";
 import { api, ForaDoUniversoError, type Ficha } from "@/lib/api";
 import { explicaSancao } from "@/lib/glossario";
 import {
@@ -61,13 +63,24 @@ export default async function Empresa({
       <header className="space-y-3">
         <BotaoVoltar />
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold">{cadastro.razao_social ?? "—"}</h1>
+          <h1 className="text-3xl font-bold">
+            {cadastro.razao_social ?? `Empresa de raiz ${cadastro.cnpj_basico}`}
+          </h1>
+          {cadastro.razao_social && (
+            <BotaoCopiar texto={cadastro.razao_social} rotulo="nome da empresa" />
+          )}
           <BadgeGrau grau={grau} indicioSucessora={sucessora} />
         </div>
         <dl className="grid gap-x-8 gap-y-1 text-sm text-muted-foreground sm:grid-cols-2">
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <dt className="font-medium">CNPJ:</dt>
-            <dd>{cadastro.cnpj ? formataCnpj(cadastro.cnpj) : `raiz ${cadastro.cnpj_basico}`}</dd>
+            <dd className="flex items-center gap-2">
+              {cadastro.cnpj ? formataCnpj(cadastro.cnpj) : `raiz ${cadastro.cnpj_basico}`}
+              <BotaoCopiar
+                texto={cadastro.cnpj ? formataCnpj(cadastro.cnpj) : cadastro.cnpj_basico}
+                rotulo="CNPJ"
+              />
+            </dd>
           </div>
           {cadastro.situacao_cadastral && (
             <div className="flex gap-2">
@@ -126,6 +139,13 @@ export default async function Empresa({
           </AlertDescription>
         </Alert>
       )}
+
+      <section aria-labelledby="grafo">
+        <h2 id="grafo" className="mb-3 text-xl font-semibold">
+          Rede de vínculos societários
+        </h2>
+        <GrafoVinculos cnpj={cadastro.cnpj_basico} />
+      </section>
 
       <section aria-labelledby="sancoes">
         <h2 id="sancoes" className="mb-3 text-xl font-semibold">

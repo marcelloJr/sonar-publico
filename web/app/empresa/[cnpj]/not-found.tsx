@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BotaoVoltar } from "@/components/botao-voltar";
 
 export default function EmpresaNaoEncontrada() {
   return (
@@ -11,9 +12,12 @@ export default function EmpresaNaoEncontrada() {
         contrato público federal recente ou vínculo societário com alguma
         sancionada.
       </p>
-      <Button asChild>
-        <Link href="/">Fazer outra busca</Link>
-      </Button>
+      <div className="flex justify-center gap-2">
+        <BotaoVoltar />
+        <Button asChild>
+          <Link href="/">Fazer outra busca</Link>
+        </Button>
+      </div>
     </div>
   );
 }

@@ -40,6 +40,14 @@ def test_ficha_fora_do_universo(cliente):
     assert "universo" in resposta.json()["detail"]
 
 
+def test_ficha_sem_nome_algum_mas_no_universo(cliente):
+    # nó do grafo sem nome em nenhuma base: a ficha existe mesmo assim
+    corpo = cliente.get("/empresas/66666666000166").json()
+    assert corpo["cadastro"]["razao_social"] is None
+    assert corpo["cadastro"]["cadastro_receita_disponivel"] is False
+    assert corpo["socios"][0]["nome_socio"] == "SOCIO SEM EMPRESA NOMEADA"
+
+
 def test_ficha_sem_cadastro_receita_usa_fallback(cliente):
     corpo = cliente.get("/empresas/44444444000144").json()
     assert corpo["cadastro"]["razao_social"] == "SO NO CONTRATO LTDA"

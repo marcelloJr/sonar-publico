@@ -58,7 +58,9 @@ def cliente(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
             cpf_mascarado VARCHAR, qualificacao VARCHAR, data_entrada DATE);
         INSERT INTO socios VALUES
             ('11111111', 'JOAO DA SILVA', '***123456**', '49', DATE '2010-01-01'),
-            ('22222222', 'JOAO DA SILVA', '***123456**', '49', DATE '2023-06-01');
+            ('22222222', 'JOAO DA SILVA', '***123456**', '49', DATE '2023-06-01'),
+            ('66666666', 'SOCIO SEM EMPRESA NOMEADA', '***555555**', '22',
+             DATE '2020-01-01');  -- raiz sem nome em nenhuma base
 
         CREATE TABLE vinculos (cnpj_a VARCHAR, cnpj_b VARCHAR, socio_comum VARCHAR,
             confianca VARCHAR);

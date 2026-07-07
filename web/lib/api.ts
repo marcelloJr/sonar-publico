@@ -1,7 +1,26 @@
 // Cliente da API do Sonar Público (FastAPI — ver /api no monorepo).
 // Server Components fazem fetch direto; a URL vem do ambiente.
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+export type NoGrafo = {
+  id: string;
+  nome: string | null;
+  grau: number | null;
+};
+
+export type ArestaGrafo = {
+  cnpj_a: string;
+  cnpj_b: string;
+  socio_comum: string;
+  confianca: string;
+};
+
+export type Grafo = {
+  centro: string;
+  nos: NoGrafo[];
+  arestas: ArestaGrafo[];
+};
 
 export type ResultadoBusca = {
   cnpj_basico: string;
