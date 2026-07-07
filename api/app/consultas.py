@@ -152,7 +152,7 @@ def grafo(con: duckdb.DuckDBPyConnection, cnpj: str, profundidade: int = 1) -> d
     # sem rótulo quando a empresa está fora do dump do CNPJ
     nos = linhas_como_dicts(con, f"""
         WITH {_NOMES_SQL},
-        ids(id) AS (VALUES {", ".join(f"(?)" for _ in ids)})
+        ids(id) AS (VALUES {", ".join("(?)" for _ in ids)})
         SELECT i.id, arg_min(n.nome, n.prioridade) AS nome, min(r.grau) AS grau
         FROM ids i
         LEFT JOIN nomes n ON n.cnpj_basico = i.id AND n.nome IS NOT NULL
@@ -162,6 +162,57 @@ def grafo(con: duckdb.DuckDBPyConnection, cnpj: str, profundidade: int = 1) -> d
     # dedup de arestas (profundidade 2 pode repetir)
     unicas = {(a["cnpj_a"], a["cnpj_b"], a["socio_comum"]): a for a in arestas}
     return {"centro": raiz, "nos": nos, "arestas": list(unicas.values())}
+
+
+def orgaos(con: duckdb.DuckDBPyConnection, limite: int = 60) -> list[dict]:
+    """Órgãos contratantes, ordenados pelo valor sob alerta (grau 0)."""
+    return linhas_como_dicts(con, f"""
+        SELECT c.orgao_codigo, any_value(c.orgao) AS orgao, any_value(c.esfera) AS esfera,
+               count(*) AS contratos,
+               coalesce(sum(c.valor_final), 0) AS valor_total,
+               count(*) FILTER (r.grau = 0) AS contratos_sob_alerta,
+               coalesce(sum(c.valor_final) FILTER (r.grau = 0), 0) AS valor_sob_alerta
+        FROM contratos c
+        LEFT JOIN empresas_risco r ON r.cnpj_basico = c.cnpj_contratado[:8] AND r.grau = 0
+        WHERE c.orgao_codigo IS NOT NULL
+        GROUP BY c.orgao_codigo
+        ORDER BY valor_sob_alerta DESC, valor_total DESC
+        LIMIT {int(limite)}
+    """, [])
+
+
+def fornecedores_do_orgao(
+    con: duckdb.DuckDBPyConnection, codigo: str, grau: int | None = None
+) -> dict | None:
+    cabecalho = con.execute(
+        "SELECT any_value(orgao), any_value(esfera) FROM contratos WHERE orgao_codigo = ?",
+        [codigo],
+    ).fetchone()
+    if not cabecalho or cabecalho[0] is None:
+        return None
+    filtro_grau = ""
+    params: list = [codigo]
+    if grau is not None:
+        filtro_grau = "HAVING min(r.grau) = ?"
+        params.append(grau)
+    fornecedores = linhas_como_dicts(con, f"""
+        SELECT c.cnpj_contratado[:8] AS cnpj_basico,
+               any_value(c.nome_contratado) AS nome,
+               min(r.grau) AS grau,
+               bool_or(coalesce(r.indicio_sucessora, false)) AS indicio_sucessora,
+               count(DISTINCT c.numero_contrato) AS contratos,
+               coalesce(sum(c.valor_final), 0) AS valor_total,
+               count(*) FILTER (c.data_fim_vigencia >= current_date) AS contratos_vigentes
+        FROM contratos c
+        LEFT JOIN empresas_risco r ON r.cnpj_basico = c.cnpj_contratado[:8]
+        WHERE c.orgao_codigo = ?
+        GROUP BY 1
+        {filtro_grau}
+        ORDER BY (min(r.grau) IS NULL), min(r.grau), valor_total DESC
+        LIMIT 200
+    """, params)
+    return {"orgao_codigo": codigo, "orgao": cabecalho[0], "esfera": cabecalho[1],
+            "fornecedores": fornecedores}
 
 
 def estatisticas(con: duckdb.DuckDBPyConnection) -> dict:

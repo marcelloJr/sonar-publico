@@ -43,15 +43,15 @@ def cliente(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
              NULL, true, 'P1', '11111111000195', 'CONSTRUTORA ACAI LTDA');
 
         CREATE TABLE contratos (origem VARCHAR, esfera VARCHAR, numero_contrato VARCHAR,
-            orgao VARCHAR, objeto VARCHAR, situacao VARCHAR, modalidade VARCHAR,
-            valor_final DECIMAL(18,2), data_inicio_vigencia DATE, data_fim_vigencia DATE,
-            cnpj_contratado VARCHAR, nome_contratado VARCHAR);
+            orgao_codigo VARCHAR, orgao VARCHAR, objeto VARCHAR, situacao VARCHAR,
+            modalidade VARCHAR, valor_final DECIMAL(18,2), data_inicio_vigencia DATE,
+            data_fim_vigencia DATE, cnpj_contratado VARCHAR, nome_contratado VARCHAR);
         INSERT INTO contratos VALUES
-            ('PORTAL', 'F', 'C-1', 'Ministério X', 'Obra', 'Ativo', 'Pregão', 1000000,
-             DATE '2025-01-01', DATE '2030-01-01', '11111111000195',
+            ('PORTAL', 'F', 'C-1', '26000', 'Ministério X', 'Obra', 'Ativo', 'Pregão',
+             1000000, DATE '2025-01-01', DATE '2030-01-01', '11111111000195',
              'CONSTRUTORA ACAI LTDA'),
-            ('PORTAL', 'F', 'C-2', 'Ministério Y', 'Consultoria', 'Ativo', 'Pregão', 5000,
-             DATE '2025-01-01', DATE '2026-12-01', '44444444000144',
+            ('PORTAL', 'F', 'C-2', '27000', 'Ministério Y', 'Consultoria', 'Ativo',
+             'Pregão', 5000, DATE '2025-01-01', DATE '2026-12-01', '44444444000144',
              'SO NO CONTRATO LTDA');  -- fora do dump da Receita: ficha via fallback
 
         CREATE TABLE socios (cnpj_basico VARCHAR, nome_socio VARCHAR,

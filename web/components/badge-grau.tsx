@@ -16,8 +16,9 @@ export function BadgeGrau({
     );
   }
   if (grau === 1) {
+    // amber-700: contraste ≥4.5 com texto branco (amber-600 reprova no WCAG AA)
     return (
-      <Badge className="bg-amber-600 text-white hover:bg-amber-600">
+      <Badge className="bg-amber-700 text-white hover:bg-amber-700">
         {indicioSucessora
           ? "Vínculo com sancionada · possível sucessora"
           : "Vínculo com sancionada"}

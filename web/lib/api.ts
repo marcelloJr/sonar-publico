@@ -116,9 +116,34 @@ async function busca<T>(caminho: string): Promise<T> {
 
 export class ForaDoUniversoError extends Error {}
 
+export type Orgao = {
+  orgao_codigo: string;
+  orgao: string;
+  esfera: string;
+  contratos: number;
+  valor_total: number | string;
+  contratos_sob_alerta: number;
+  valor_sob_alerta: number | string;
+};
+
+export type FornecedorDoOrgao = {
+  cnpj_basico: string;
+  nome: string | null;
+  grau: number | null;
+  indicio_sucessora: boolean;
+  contratos: number;
+  valor_total: number | string;
+  contratos_vigentes: number;
+};
+
 export const api = {
   estatisticas: () => busca<Estatisticas>("/estatisticas"),
   buscar: (q: string) =>
     busca<{ resultados: ResultadoBusca[] }>(`/busca?q=${encodeURIComponent(q)}`),
   ficha: (cnpj: string) => busca<Ficha>(`/empresas/${cnpj}`),
+  orgaos: () => busca<{ orgaos: Orgao[] }>("/orgaos"),
+  fornecedores: (codigo: string) =>
+    busca<{ orgao_codigo: string; orgao: string; esfera: string; fornecedores: FornecedorDoOrgao[] }>(
+      `/orgaos/${codigo}/fornecedores`
+    ),
 };

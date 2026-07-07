@@ -50,6 +50,9 @@ export default function RootLayout({
               Sonar Público
             </Link>
             <div className="flex gap-4 text-sm">
+              <Link href="/orgaos" className="hover:underline">
+                Órgãos
+              </Link>
               <Link href="/metodologia" className="hover:underline">
                 Metodologia
               </Link>

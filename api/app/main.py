@@ -54,6 +54,19 @@ def grafo(con: Con, cnpj: str, profundidade: int = 1) -> dict:
     return consultas.grafo(con, cnpj, profundidade)
 
 
+@app.get("/orgaos")
+def orgaos(con: Con) -> dict:
+    return {"orgaos": consultas.orgaos(con)}
+
+
+@app.get("/orgaos/{codigo}/fornecedores")
+def fornecedores(con: Con, codigo: str, grau: int | None = None) -> dict:
+    resultado = consultas.fornecedores_do_orgao(con, codigo, grau)
+    if resultado is None:
+        raise HTTPException(404, detail="órgão não encontrado nos contratos carregados")
+    return resultado
+
+
 @app.get("/estatisticas")
 def estatisticas(con: Con) -> dict:
     return consultas.estatisticas(con)

@@ -62,6 +62,32 @@ def test_grafo(cliente):
     assert corpo["arestas"][0]["socio_comum"] == "JOAO DA SILVA"
 
 
+def test_orgaos_ordenados_por_alerta(cliente):
+    corpo = cliente.get("/orgaos").json()
+    assert corpo["orgaos"][0]["orgao"] == "Ministério X"  # tem contrato de sancionada
+    assert corpo["orgaos"][0]["contratos_sob_alerta"] == 1
+    assert float(corpo["orgaos"][0]["valor_sob_alerta"]) == 1000000.0
+    assert corpo["orgaos"][1]["contratos_sob_alerta"] == 0
+
+
+def test_fornecedores_do_orgao(cliente):
+    corpo = cliente.get("/orgaos/26000/fornecedores").json()
+    assert corpo["orgao"] == "Ministério X"
+    f = corpo["fornecedores"][0]
+    assert f["nome"] == "CONSTRUTORA ACAI LTDA"
+    assert f["grau"] == 0
+    assert f["contratos_vigentes"] == 1
+
+
+def test_fornecedores_filtrados_por_grau(cliente):
+    corpo = cliente.get("/orgaos/27000/fornecedores", params={"grau": 0}).json()
+    assert corpo["fornecedores"] == []  # fornecedor do Y não tem sanção
+
+
+def test_orgao_inexistente(cliente):
+    assert cliente.get("/orgaos/99999/fornecedores").status_code == 404
+
+
 def test_estatisticas(cliente):
     corpo = cliente.get("/estatisticas").json()
     assert corpo["sancionadas_vigentes"] == 1
